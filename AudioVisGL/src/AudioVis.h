@@ -24,7 +24,7 @@ private:
 	void handle_input(SDL_Event& e);
 
 	// Audio
-	Mix_Chunk* audio_wav;
+	Mix_Music* p_music;
 
 	WaveRenderer wave_renderer;
 

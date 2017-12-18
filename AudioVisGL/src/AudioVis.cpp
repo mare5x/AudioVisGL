@@ -9,7 +9,7 @@ const float FPS_ms = 1 / static_cast<float>(FPS) * 1000;
 
 void audio_callback(int channel, void* stream, int len, void* udata);
 
-const int WAVEDATA_SIZE = 2048;
+const int WAVEDATA_SIZE = 4096;
 float wavedata[WAVEDATA_SIZE];
 float volume = 1;
 
@@ -110,16 +110,19 @@ bool AudioVis::init_gl()
 {
 	wave_renderer.init();
 
-	audio_wav = Mix_LoadWAV("src/sound.wav");
 	Mix_RegisterEffect(MIX_CHANNEL_POST, audio_callback, NULL, NULL);
-	Mix_PlayChannel(-1, audio_wav, -1);
+	p_music = Mix_LoadMUS("D:/Mare5/Music/Songy stuff/Wham! - Last Christmas.mp3");
+	if (p_music == NULL)
+		printf("Mix_PlayMusic: %s\n", Mix_GetError());
+	if (Mix_PlayMusic(p_music, -1) != 0)
+		printf("Mix_PlayMusic: %s\n", Mix_GetError());
 
 	return true;
 }
 
 void AudioVis::quit()
 {
-	Mix_FreeChunk(audio_wav);
+	Mix_FreeMusic(p_music);
 	Mix_CloseAudio();
 	Mix_Quit();
 
@@ -143,7 +146,7 @@ void audio_callback(int channel, void * stream, int len, void * udata)
 	float min = 1;
 	int samples_per_wavedata = len / WAVEDATA_SIZE;
 	float running_avg = 0;
-	int wavedata_idx = 0;
+	int wavedata_idx = WAVEDATA_SIZE - 1;  // this way the waves travel from left to right, since the sample stream is processed in chronological order
 	int c = 0;
 	for (int i = 0; i < len; i++, c++) {
 		float d = (float)(data[i]) / (1 << 15);
@@ -153,11 +156,13 @@ void audio_callback(int channel, void * stream, int len, void * udata)
 		running_avg += d / samples_per_wavedata;
 		if (c == samples_per_wavedata) {
 			wavedata[wavedata_idx] = running_avg;
-			wavedata_idx++;
+			wavedata_idx--;
 			running_avg = 0;
 			c = 0;
 		}
 	}
+	wavedata[wavedata_idx] = running_avg;
+	
 	volume = std::fmin(1, std::fmax(0.3f, max));
 	SDL_Log("%d %f %f\n", len, min, max);
 }
