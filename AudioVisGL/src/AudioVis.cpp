@@ -136,6 +136,12 @@ void AudioVis::quit()
 
 void AudioVis::handle_input(SDL_Event & e)
 {
+	if (e.type == SDL_KEYUP) {
+		if (e.key.keysym.sym == SDLK_q)
+			wave_renderer.toggle_render_volume();
+		else if (e.key.keysym.sym == SDLK_w)
+			wave_renderer.toggle_render_wave();
+	}
 }
 
 void audio_callback(int channel, void * stream, int len, void * udata)
@@ -163,6 +169,6 @@ void audio_callback(int channel, void * stream, int len, void * udata)
 	}
 	wavedata[wavedata_idx] = running_avg;
 	
-	volume = std::fmin(1, std::fmax(0.3f, max));
+	volume = (volume + std::fmin(1, std::fmax(0.3f, 0.3f + max * 0.7f))) / 2.0f;
 	SDL_Log("%d %f %f\n", len, min, max);
 }

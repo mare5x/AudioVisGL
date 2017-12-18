@@ -24,7 +24,7 @@ void WaveRenderer::init()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)(0));
 
-	quad_shader = Shader("src/Shaders/vert_shader.vs", "src/Shaders/frag_shader.fs");
+	quad_shader = Shader("src/Shaders/quad.vs", "src/Shaders/quad.fs");
 	quad_shader.use();
 	quad_shader.setFloat("scale", 1);
 
@@ -61,16 +61,19 @@ void WaveRenderer::init()
 
 void WaveRenderer::render()
 {
-	quad_shader.use();
+	if (render_volume) {
+		quad_shader.use();
 
-	glBindVertexArray(quad_vao);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-
-	wavedata_shader.use();
-	glBindVertexArray(wavedata_vao);
-	glDrawArraysInstanced(GL_POINTS, 0, 1, wavedata_size);
-	glBindVertexArray(0);
+		glBindVertexArray(quad_vao);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	}
+	if (render_wave) {
+		wavedata_shader.use();
+		glBindVertexArray(wavedata_vao);
+		glDrawArraysInstanced(GL_POINTS, 0, 1, wavedata_size);
+		glBindVertexArray(0);
+	}
 }
 
 void WaveRenderer::set_wavedata(float wavedata[])
