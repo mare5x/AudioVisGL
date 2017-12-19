@@ -2,6 +2,8 @@
 
 uniform float scale;
 
+in vec2 v_pos;
+
 out vec4 frag_color;
 
 void main()

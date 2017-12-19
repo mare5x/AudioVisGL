@@ -5,7 +5,9 @@
 
 class WaveRenderer {
 public:
-	WaveRenderer(int wavedata_n) : wavedata_size(wavedata_n), render_volume(true), render_wave(true) { }
+	WaveRenderer(int _wavedata, int _frequency_bands) : 
+		wavedata_size(_wavedata), frequency_bands(_frequency_bands),
+		render_volume(true), render_wave(true), render_frequency_bands(true) { }
 	~WaveRenderer();
 
 	void init();
@@ -13,22 +15,23 @@ public:
 	void render();
 
 	void set_wavedata(float wavedata[]);
-
 	void set_volume(float volume);
+	void set_frequency_bands(float frequencies[]);
 
 	void toggle_render_wave() { render_wave = !render_wave; }
 	void toggle_render_volume() { render_volume = !render_volume; }
-
-	void set_render_wave(bool val) { render_wave = val; }
-	void set_render_volume(bool val) { render_volume = val; }
+	void toggle_render_frequency_bands() { render_frequency_bands = !render_frequency_bands; }
 private:
-	const int wavedata_size;
+	const int wavedata_size, frequency_bands;
 
-	bool render_volume, render_wave;
+	bool render_volume, render_wave, render_frequency_bands;
 
-	GLuint quad_vao, quad_vbo;
-	Shader quad_shader;
+	GLuint volume_quad_vao, volume_quad_vbo;
+	Shader volume_quad_shader;
 
 	GLuint wavedata_vao, point_vbo, wavedata_vbo;
 	Shader wavedata_shader;
+
+	GLuint frequencies_vao, frequencies_bar_vbo, frequencies_heights_vbo;
+	Shader frequencies_shader;
 };
