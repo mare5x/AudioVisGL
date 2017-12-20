@@ -8,5 +8,7 @@ out vec4 frag_color;
 
 void main()
 {
-	frag_color = vec4(scale / 4, scale, scale, 1);
+	float len = length(v_pos);
+	if (len > 0.3 && len < 0.5)
+		frag_color = vec4(scale / 2.0, scale / 8.0, scale / 2.0, 1);
 }

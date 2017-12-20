@@ -14,6 +14,8 @@ public:
 
 	void render();
 
+	void on_resize(int w, int h);
+
 	void set_wavedata(float wavedata[]);
 	void set_volume(float volume);
 	void set_frequency_bands(float frequencies[]);

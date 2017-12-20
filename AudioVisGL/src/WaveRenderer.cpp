@@ -3,7 +3,10 @@
 WaveRenderer::~WaveRenderer()
 {
 	glDeleteVertexArrays(1, &volume_quad_vao);
-	glDeleteBuffers(1, &volume_quad_vbo);
+	glDeleteVertexArrays(1, &wavedata_vao);
+	glDeleteVertexArrays(1, &frequencies_vao);
+	const GLuint vbos[] = { volume_quad_vbo, point_vbo, wavedata_vbo, frequencies_bar_vbo, frequencies_heights_vbo };
+	glDeleteBuffers(5, vbos);
 }
 
 void WaveRenderer::init()
@@ -21,12 +24,16 @@ void WaveRenderer::init()
 
 	glGenVertexArrays(1, &volume_quad_vao);
 	glBindVertexArray(volume_quad_vao);
+
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *)(0));
+
+	glBindVertexArray(0);
 
 	volume_quad_shader = Shader("src/Shaders/quad.vs", "src/Shaders/quad.fs");
 	volume_quad_shader.use();
 	volume_quad_shader.setFloat("scale", 1);
+	volume_quad_shader.setFloat("aspect_ratio", 1);
 
 	float point[] = {
 		0.0f, 0.0f
@@ -52,7 +59,9 @@ void WaveRenderer::init()
 	glVertexAttribDivisor(0, 0);
 	glVertexAttribDivisor(1, 1);
 
-	glPointSize(3);
+	glPointSize(2);
+
+	glBindVertexArray(0);
 
 	wavedata_shader = Shader("src/Shaders/wavedata.vs", "src/Shaders/wavedata.fs");
 	wavedata_shader.use();
@@ -86,6 +95,8 @@ void WaveRenderer::init()
 	glVertexAttribDivisor(0, 0);
 	glVertexAttribDivisor(1, 1);
 
+	glBindVertexArray(0);
+
 	frequencies_shader = Shader("src/Shaders/freq.vs", "src/Shaders/freq.fs");
 	frequencies_shader.use();
 	frequencies_shader.setFloat("frequency_bands", frequency_bands);
@@ -111,6 +122,13 @@ void WaveRenderer::render()
 		glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, frequency_bands);
 		glBindVertexArray(0);
 	}
+}
+
+void WaveRenderer::on_resize(int w, int h)
+{
+	float aspect_ratio = w / (float)(h);
+	volume_quad_shader.use();
+	volume_quad_shader.setFloat("aspect_ratio", aspect_ratio);
 }
 
 void WaveRenderer::set_wavedata(float wavedata[])

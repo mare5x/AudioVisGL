@@ -86,7 +86,7 @@ bool AudioVis::init()
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-		window = SDL_CreateWindow("AudioVis", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
+		window = SDL_CreateWindow("AudioVis", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 		if (!window) {
 			SDL_Log("CREATE WINDOW ERROR: %s", SDL_GetError());
 			return false;
@@ -106,10 +106,6 @@ bool AudioVis::init()
 			return false;
 		}
 
-		glViewport(0, 0, width, height);
-
-		SDL_GL_SetSwapInterval(0);  // uncap FPS
-
 		return init_gl();
 	}
 	else {
@@ -122,10 +118,14 @@ bool AudioVis::init_gl()
 {
 	wave_renderer.init();
 
+	SDL_GL_SetSwapInterval(0);  // uncap FPS
+
+	on_resize(width, height);
+
 	Mix_RegisterEffect(MIX_CHANNEL_POST, audio_callback, NULL, NULL);
-	p_music = Mix_LoadMUS("D:/Mare5/Music/Soundtracks/Sid Meier's Civilization VI (2016) [MP3, V0]/Sogno di Volare (Civilization VI Main Theme) by Christopher Tin/01. Sogno di Volare ('The Dream of Flight').mp3");
+	p_music = Mix_LoadMUS("D:/Mare5/Music/Classical/01 Peer Gynt-Morning.mp3");
 	if (p_music == NULL)
-		printf("Mix_PlayMusic: %s\n", Mix_GetError());
+		printf("Mix_LoadMUS: %s\n", Mix_GetError());
 	if (Mix_PlayMusic(p_music, -1) != 0)
 		printf("Mix_PlayMusic: %s\n", Mix_GetError());
 
@@ -146,6 +146,15 @@ void AudioVis::quit()
 	SDL_Quit();
 }
 
+void AudioVis::on_resize(int w, int h)
+{
+	glViewport(0, 0, w, h);
+	width = w;
+	height = h;
+
+	wave_renderer.on_resize(w, h);
+}
+
 void AudioVis::handle_input(SDL_Event & e)
 {
 	if (e.type == SDL_KEYUP) {
@@ -155,6 +164,10 @@ void AudioVis::handle_input(SDL_Event & e)
 			wave_renderer.toggle_render_wave();
 		else if (e.key.keysym.sym == SDLK_e)
 			wave_renderer.toggle_render_frequency_bands();
+	}
+	else if (e.type == SDL_WINDOWEVENT) {
+		if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+			on_resize(e.window.data1, e.window.data2);
 	}
 }
 

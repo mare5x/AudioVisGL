@@ -21,6 +21,8 @@ private:
 	bool init_gl();
 	void quit();
 
+	void on_resize(int w, int h);
+
 	void handle_input(SDL_Event& e);
 
 	// Audio
