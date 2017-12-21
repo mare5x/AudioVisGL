@@ -1,13 +1,12 @@
 #pragma once
 #include "Shaders\Shader.h"
 #include "glad\glad.h"
+#include <vector>
 
 
 class WaveRenderer {
 public:
-	WaveRenderer(int _wavedata, int _frequency_bands) : 
-		wavedata_size(_wavedata), frequency_bands(_frequency_bands),
-		render_volume(true), render_wave(true), render_frequency_bands(true) { }
+	WaveRenderer(int _wavedata, int _frequency_bands);
 	~WaveRenderer();
 
 	void init();
@@ -25,6 +24,9 @@ public:
 	void toggle_render_frequency_bands() { render_frequency_bands = !render_frequency_bands; }
 private:
 	const int wavedata_size, frequency_bands;
+	const int interpolated_wavedata_size;
+
+	std::vector<float> interpolated_wavedata;
 
 	bool render_volume, render_wave, render_frequency_bands;
 

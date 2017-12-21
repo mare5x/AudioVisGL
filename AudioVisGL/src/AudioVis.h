@@ -8,7 +8,7 @@
 
 class AudioVis {
 public:
-	AudioVis();
+	AudioVis(const char* path);
 	~AudioVis() { quit(); }
 
 	void run();
@@ -26,6 +26,8 @@ private:
 	void handle_input(SDL_Event& e);
 
 	// Audio
+	const char* music_path;
+
 	Mix_Music* p_music;
 
 	WaveRenderer wave_renderer;

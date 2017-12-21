@@ -6,8 +6,8 @@
 const int WIDTH = 800;
 const int HEIGHT = 600;
 
-const int FPS = 120;
-const float FPS_ms = 1 / static_cast<float>(FPS) * 1000;
+const int FPS = 5;
+const float FPS_ms = 1 / static_cast<float>(FPS) * 1000;  // DOESN'T WORK?!?!?!? GETS RESET TO 0.0 ?!?!?!?!??!
 
 const int WAVEDATA_SAMPLES = 2048;
 const int FREQUENCIES_SIZE = WAVEDATA_SAMPLES / 2 + 1;
@@ -23,8 +23,9 @@ void audio_callback(int channel, void* stream, int len, void* udata);
 void update_frequencies();
 
 
-AudioVis::AudioVis() :
+AudioVis::AudioVis(const char* path) :
 	width(WIDTH), height(HEIGHT),
+	music_path(path),
 	wave_renderer(WAVEDATA_SAMPLES, FREQUENCY_BANDS)
 {
 	if (!init())
@@ -123,11 +124,13 @@ bool AudioVis::init_gl()
 	on_resize(width, height);
 
 	Mix_RegisterEffect(MIX_CHANNEL_POST, audio_callback, NULL, NULL);
-	p_music = Mix_LoadMUS("D:/Mare5/Music/Classical/01 Peer Gynt-Morning.mp3");
+	p_music = Mix_LoadMUS(music_path);
 	if (p_music == NULL)
-		printf("Mix_LoadMUS: %s\n", Mix_GetError());
+		SDL_Log("Mix_LoadMUS: %s\n", Mix_GetError());
 	if (Mix_PlayMusic(p_music, -1) != 0)
-		printf("Mix_PlayMusic: %s\n", Mix_GetError());
+		SDL_Log("Mix_PlayMusic: %s\n", Mix_GetError());
+	else
+		SDL_Log("Playing: %s\n", music_path);
 
 	return true;
 }
@@ -216,7 +219,7 @@ void update_frequencies()
 	for (int i = 0; i < upper_bound_freq_idx; i++) {
 		fft_magnitudes[i] = sqrt(re[i] * re[i] + im[i] * im[i]);
 
-		// printf("%d Hz: %f\n", (int)(44100.0f / WAVEDATA_SAMPLES * i), fft_magnitudes[i]);
+		// SDL_Log("%d Hz: %f\n", (int)(44100.0f / WAVEDATA_SAMPLES * i), fft_magnitudes[i]);
 
 		avg_freq += fft_magnitudes[i] / steps_per_freq_band;
 		if (i % steps_per_freq_band == 0) {

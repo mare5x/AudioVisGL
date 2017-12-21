@@ -1,5 +1,17 @@
 #include "WaveRenderer.h"
 
+
+const int INTERPOLATED_POINTS = 16;
+
+
+WaveRenderer::WaveRenderer(int _wavedata, int _frequency_bands)
+	: wavedata_size(_wavedata), frequency_bands(_frequency_bands),
+	interpolated_wavedata_size(INTERPOLATED_POINTS * _wavedata - INTERPOLATED_POINTS + 1), interpolated_wavedata(interpolated_wavedata_size),
+	render_volume(true), render_wave(true), render_frequency_bands(true)
+{
+
+}
+
 WaveRenderer::~WaveRenderer()
 {
 	glDeleteVertexArrays(1, &volume_quad_vao);
@@ -30,7 +42,7 @@ void WaveRenderer::init()
 
 	glBindVertexArray(0);
 
-	volume_quad_shader = Shader("src/Shaders/quad.vs", "src/Shaders/quad.fs");
+	volume_quad_shader = Shader("Shaders/quad.vs", "Shaders/quad.fs");
 	volume_quad_shader.use();
 	volume_quad_shader.setFloat("scale", 1);
 	volume_quad_shader.setFloat("aspect_ratio", 1);
@@ -51,7 +63,7 @@ void WaveRenderer::init()
 	
 	glGenBuffers(1, &wavedata_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, wavedata_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * wavedata_size, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * interpolated_wavedata_size, NULL, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(float), (void *)(0));
@@ -63,9 +75,9 @@ void WaveRenderer::init()
 
 	glBindVertexArray(0);
 
-	wavedata_shader = Shader("src/Shaders/wavedata.vs", "src/Shaders/wavedata.fs");
+	wavedata_shader = Shader("Shaders/wavedata.vs", "Shaders/wavedata.fs");
 	wavedata_shader.use();
-	wavedata_shader.setFloat("wavedata_size", wavedata_size);
+	wavedata_shader.setFloat("wavedata_size", interpolated_wavedata_size);
 
 	float freq_bar_width = 2.0f / frequency_bands;
 	float freq_bar_quad[] = {
@@ -97,7 +109,7 @@ void WaveRenderer::init()
 
 	glBindVertexArray(0);
 
-	frequencies_shader = Shader("src/Shaders/freq.vs", "src/Shaders/freq.fs");
+	frequencies_shader = Shader("Shaders/freq.vs", "Shaders/freq.fs");
 	frequencies_shader.use();
 	frequencies_shader.setFloat("frequency_bands", frequency_bands);
 }
@@ -113,7 +125,7 @@ void WaveRenderer::render()
 	if (render_wave) {
 		wavedata_shader.use();
 		glBindVertexArray(wavedata_vao);
-		glDrawArraysInstanced(GL_POINTS, 0, 1, wavedata_size);
+		glDrawArraysInstanced(GL_POINTS, 0, 1, interpolated_wavedata_size);
 		glBindVertexArray(0);
 	}
 	if (render_frequency_bands) {
@@ -133,8 +145,18 @@ void WaveRenderer::on_resize(int w, int h)
 
 void WaveRenderer::set_wavedata(float wavedata[])
 {
+	for (size_t i = 0; i < wavedata_size - 1; i++) {
+		float cur = wavedata[i];
+		float diff = wavedata[i + 1] - cur;
+		size_t idx = i * INTERPOLATED_POINTS;
+		for (size_t j = 0; j < INTERPOLATED_POINTS; j++) {
+			interpolated_wavedata[idx + j] = cur + (diff / INTERPOLATED_POINTS * j);
+		}
+	}
+	interpolated_wavedata[(wavedata_size - 1) * INTERPOLATED_POINTS] = wavedata[wavedata_size - 1];
+
 	glBindBuffer(GL_ARRAY_BUFFER, wavedata_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * wavedata_size, wavedata, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * interpolated_wavedata_size, interpolated_wavedata.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

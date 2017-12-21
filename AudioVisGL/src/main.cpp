@@ -2,7 +2,9 @@
 
 int main(int argc, char* argv[])
 {
-	AudioVis app = AudioVis();
-	app.run();
+	if (argc == 2) {
+		AudioVis app = AudioVis(argv[1]);
+		app.run();
+	}
 	return 0;
 }
