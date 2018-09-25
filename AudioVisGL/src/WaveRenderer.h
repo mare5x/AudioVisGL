@@ -24,16 +24,13 @@ public:
 	void toggle_render_frequency_bands() { render_frequency_bands = !render_frequency_bands; }
 private:
 	const int wavedata_size, frequency_bands;
-	const int interpolated_wavedata_size;
-
-	std::vector<float> interpolated_wavedata;
 
 	bool render_volume, render_wave, render_frequency_bands;
 
 	GLuint volume_quad_vao, volume_quad_vbo;
 	Shader volume_quad_shader;
 
-	GLuint wavedata_vao, point_vbo, wavedata_vbo;
+	GLuint wavedata_vao, wavedata_vbo, wavedata_indices_vbo;
 	Shader wavedata_shader;
 
 	GLuint frequencies_vao, frequencies_bar_vbo, frequencies_heights_vbo;

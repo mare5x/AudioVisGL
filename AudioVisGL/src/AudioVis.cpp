@@ -1,18 +1,19 @@
 #include "AudioVis.h"
-#include "AudioFFT.h"
+#include "AudioFFT.h"  // https://github.com/HiFi-LoFi/AudioFFT
 #include <vector>
 
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
 
-const int FPS = 5;
-const float FPS_ms = 1 / static_cast<float>(FPS) * 1000;  // DOESN'T WORK?!?!?!? GETS RESET TO 0.0 ?!?!?!?!??!
+const int FPS = 60;
+const int FPS_ms = 1.0f / FPS * 1000.0f;  // DOESN'T WORK?!?!?!? GETS RESET TO 0.0 ?!?!?!?!??!
 
 const int WAVEDATA_SAMPLES = 2048;
 const int FREQUENCIES_SIZE = WAVEDATA_SAMPLES / 2 + 1;
 const int FREQUENCY_BANDS = 128;
 
+// https://stackoverflow.com/questions/604453/analyze-audio-using-fast-fourier-transform
 float wavedata[WAVEDATA_SAMPLES];
 float fft_magnitudes[FREQUENCIES_SIZE];
 float frequency_bands[FREQUENCY_BANDS];  // index is a frequency band, f[i] is the magnitude in range [0, 1.75]
@@ -122,7 +123,7 @@ bool AudioVis::init_gl()
 	SDL_GL_SetSwapInterval(0);  // uncap FPS
 
 	on_resize(width, height);
-
+	
 	Mix_RegisterEffect(MIX_CHANNEL_POST, audio_callback, NULL, NULL);
 	p_music = Mix_LoadMUS(music_path);
 	if (p_music == NULL)
@@ -182,7 +183,7 @@ void audio_callback(int channel, void * stream, int len, void * udata)
 	float min = 1;
 	int samples_per_wavedata = len / 2.0f / WAVEDATA_SAMPLES;
 	float running_avg = 0;
-	int wavedata_idx = WAVEDATA_SAMPLES - 1;  // this way the waves travel from left to right, since the sample stream is processed in chronological order
+	int wavedata_idx = 0;
 	int c = 0;
 	for (int i = 0; i < len / 2; i++, c++) {
 		float avg_sample = (data[2 * i] + data[2 * i + 1]) / 2.0f;  // average the left and right audio channel samples, (len is always a power of 2)
@@ -193,7 +194,7 @@ void audio_callback(int channel, void * stream, int len, void * udata)
 		running_avg += d / samples_per_wavedata;
 		if (c == samples_per_wavedata) {
 			wavedata[wavedata_idx] = running_avg;
-			wavedata_idx--;
+			++wavedata_idx;
 			running_avg = 0;
 			c = 0;
 		}
