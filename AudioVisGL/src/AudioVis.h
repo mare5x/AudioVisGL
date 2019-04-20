@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 #include "SDL.h"
 #include "SDL_mixer.h"
-#include "Shaders/Shader.h"
+#include "Shader.h"
 #include "WaveRenderer.h"
 
 
@@ -35,7 +35,6 @@ private:
 	// Window variables
 	int width, height;
 	bool quit_requested;
-	unsigned int current_time;  // in milliseconds
 
 	// SDL stuff
 	SDL_Event sdl_event;

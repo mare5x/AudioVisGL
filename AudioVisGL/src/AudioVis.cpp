@@ -7,7 +7,7 @@ const int WIDTH = 800;
 const int HEIGHT = 600;
 
 const int FPS = 60;
-const int FPS_ms = 1.0f / FPS * 1000.0f;  // DOESN'T WORK?!?!?!? GETS RESET TO 0.0 ?!?!?!?!??!
+const int FPS_ms = 1.0f / FPS * 1000.0f; 
 
 const int WAVEDATA_SAMPLES = 2048;
 const int FREQUENCIES_SIZE = WAVEDATA_SAMPLES / 2 + 1;
@@ -35,7 +35,6 @@ AudioVis::AudioVis(const char* path) :
 
 void AudioVis::run()
 {
-	current_time = SDL_GetTicks();
 	while (!quit_requested) {
 		unsigned int start_time = SDL_GetTicks();
 

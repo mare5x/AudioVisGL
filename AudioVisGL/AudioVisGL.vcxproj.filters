@@ -35,10 +35,10 @@
     <ClInclude Include="src\AudioVis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Shaders\Shader.h">
+    <ClInclude Include="src\WaveRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\WaveRenderer.h">
+    <ClInclude Include="src\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

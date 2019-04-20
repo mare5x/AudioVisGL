@@ -1,15 +1,9 @@
 #include "WaveRenderer.h"
 
-
-const int INTERPOLATED_POINTS = 16;
-
-
 WaveRenderer::WaveRenderer(int _wavedata, int _frequency_bands)
 	: wavedata_size(_wavedata), frequency_bands(_frequency_bands),
 	render_volume(true), render_wave(true), render_frequency_bands(true)
-{
-
-}
+{ }
 
 WaveRenderer::~WaveRenderer()
 {
@@ -66,11 +60,12 @@ void WaveRenderer::init()
 	// the x offset of a point.
 	glGenBuffers(1, &wavedata_indices_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, wavedata_indices_vbo);
-	int* indices = new int[wavedata_size];
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * wavedata_size, NULL, GL_STATIC_DRAW);
+
+	int* indices = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	for (int i = 0; i < wavedata_size; ++i)
 		indices[i] = i;
-	glBufferData(GL_ARRAY_BUFFER, sizeof(int) * wavedata_size, indices, GL_STATIC_DRAW);
-	delete[] indices;
+	glUnmapBuffer(GL_ARRAY_BUFFER);
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 1, GL_INT, GL_FALSE, sizeof(int), (void *)(0));
@@ -152,7 +147,7 @@ void WaveRenderer::on_resize(int w, int h)
 void WaveRenderer::set_wavedata(float wavedata[])
 {
 	glBindBuffer(GL_ARRAY_BUFFER, wavedata_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * wavedata_size, wavedata, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * wavedata_size, wavedata);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -165,6 +160,6 @@ void WaveRenderer::set_volume(float volume)
 void WaveRenderer::set_frequency_bands(float frequencies[])
 {
 	glBindBuffer(GL_ARRAY_BUFFER, frequencies_heights_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * frequency_bands, frequencies, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * frequency_bands, frequencies);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
